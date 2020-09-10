@@ -80,15 +80,21 @@ class WavefunctionDevice(ForestDevice):
         self.qc = WavefunctionSimulator(connection=self.connection)
         self._state = None
 
+        self.expand = kwargs.get("expand_state", False)
+
     def apply(self, operations, **kwargs):
         super().apply(operations, **kwargs)
 
         self._state = self.qc.wavefunction(self.prog).amplitudes
+        print('after qw', len(self._state))
 
         # pyQuil uses the convention that the first qubit is the least significant
         # qubit. Here, we reverse this to make it the last qubit, matching PennyLane convention.
         self._state = self._state.reshape([2] * len(self._active_wires)).T.flatten()
-        self.expand_state()
+
+        print('after reshape', len(self._state))
+        if self.expand:
+            self._state = self.expand_state()
 
     def expand_state(self):
         """The pyQuil wavefunction simulator initializes qubits dymnically as they are requested.
@@ -112,6 +118,4 @@ class WavefunctionDevice(ForestDevice):
         expanded_state = np.moveaxis(
             expanded_state, range(len(device_active_wires)), device_active_wires.labels
         )
-        expanded_state = expanded_state.flatten()
-
-        self._state = expanded_state
+        return expanded_state.flatten()

@@ -361,5 +361,7 @@ class ForestDevice(QubitDevice):
         if self._state is None:
             return None
 
-        prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
-        return prob
+        if hasattr(self, "expand") and not self.expand:
+            return self.marginal_prob_dynamic(wires)
+
+        return self.marginal_prob(np.abs(self._state) ** 2, wires)
