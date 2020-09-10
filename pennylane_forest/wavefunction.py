@@ -86,13 +86,11 @@ class WavefunctionDevice(ForestDevice):
         super().apply(operations, **kwargs)
 
         self._state = self.qc.wavefunction(self.prog).amplitudes
-        print('after qw', len(self._state))
 
         # pyQuil uses the convention that the first qubit is the least significant
         # qubit. Here, we reverse this to make it the last qubit, matching PennyLane convention.
         self._state = self._state.reshape([2] * len(self._active_wires)).T.flatten()
 
-        print('after reshape', len(self._state))
         if self.expand:
             self._state = self.expand_state()
 
